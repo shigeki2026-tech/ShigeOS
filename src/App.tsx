@@ -25,8 +25,10 @@ function toNumber(value: string | number | null | undefined): number {
 }
 
 function parseAmountFromInput(value: string): number | null {
-  const normalized = value.trim().replace(/,/g, '')
-  if (!normalized) return null
+  const match = value.match(/\d[\d,]*(?:\.\d+)?/)
+  if (!match) return null
+
+  const normalized = match[0].replace(/,/g, '')
   const parsed = Number(normalized)
   return Number.isFinite(parsed) ? parsed : null
 }
@@ -43,9 +45,9 @@ function scoreTask(task: Task): number {
 }
 
 function formatMoney(value: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('th-TH', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'THB',
     maximumFractionDigits: 2,
   }).format(value)
 }
@@ -421,7 +423,41 @@ function App() {
                     className="rounded-2xl border border-stone-800 bg-stone-950 p-3"
                   >
                     <p className="text-sm text-stone-100">{journal.content}</p>
-                    <p className="mt-2 text-xs text-stone-500">Needs tags or mood.</p>
+                    <div className="mt-3 grid grid-cols-1 gap-2">
+                      <label className="text-xs text-stone-400">
+                        Tags
+                        <input
+                          value={(journal.tags ?? []).join(', ')}
+                          onChange={(event) =>
+                            void updateJournal(journal.id, { tags: parseTags(event.target.value) })
+                          }
+                          placeholder="work, health"
+                          className="mt-1 w-full rounded-xl border border-stone-700 bg-stone-900 px-3 py-2 text-sm"
+                        />
+                      </label>
+                      <label className="text-xs text-stone-400">
+                        Mood
+                        <select
+                          value={journal.mood_score ?? ''}
+                          onChange={(event) =>
+                            void updateJournal(journal.id, {
+                              mood_score: event.target.value ? Number(event.target.value) : null,
+                            })
+                          }
+                          className="mt-1 w-full rounded-xl border border-stone-700 bg-stone-900 px-3 py-2 text-sm"
+                        >
+                          <option value="">Unset</option>
+                          {moodOptions.map((value) => (
+                            <option key={value} value={value}>
+                              {value}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <p className="mt-2 text-xs text-stone-500">
+                      Add missing tags or mood here to clear it from the inbox.
+                    </p>
                   </div>
                 ))}
 
