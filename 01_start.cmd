@@ -11,8 +11,8 @@ call npm install
 if errorlevel 1 goto installfail
 
 :run
-start "" http://localhost:5173
-call npm run dev
+start "" cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:5174/"
+call npm run dev -- --port 5174 --strictPort
 pause
 exit /b 0
 
